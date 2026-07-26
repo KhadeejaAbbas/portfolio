@@ -1,0 +1,301 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Nunito Sans", sans-serif;
+    font-weight: 700;;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Experience */
+#expereince{
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    inset: 0;
+    z-index: 0;
+    transform: scale(1.03);
+    transition: transform 1.2s ease;
+
+}
+
+body.experience-started #experience {
+    transform: scale(1);
+}
+
+#expereince-canvas{
+    height: 100%;
+    width: 100%; 
+    display: block;
+}
+
+/* Utilities */
+.hidden {
+    display: none;
+}
+
+
+/* Modal */
+.modal{
+    z-index: 999;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 700px;
+    background-color: #B27C66;
+    border: 2px solid #fff;
+    color: #fff
+}
+
+.modal-wrapper {
+    padding: 25px;
+}
+
+.modal-header{
+    width: 100%; 
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(20, 30, 35, 0.42);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+        opacity 0.9s ease,
+        visibility 0.9s ease,
+        backdrop-filter 0.9s ease,
+        background 0.9s ease;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    background: rgba(20, 30, 35, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+}
+.loading-content {
+    width: min(430px, 85vw);
+    padding: 36px 32px;
+
+    text-align: center;
+    color: white;
+
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 24px;
+
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.loading-content h1 {
+    margin: 0 0 28px;
+    font-family: "Quicksand", sans-serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
+}
+
+#loading-text {
+    margin: 0;
+    min-height: 28px;
+
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    opacity: 1;
+    transition: opacity 0.3s ease;
+
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+
+
+.loading-animation {
+    position: relative;
+    width: 220px;
+    height: 90px;
+    margin: 0 auto 24px;
+}
+
+.loading-car {
+    font-size: 48px;
+    animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(2deg);
+    }
+}
+
+.loading-road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+
+    height: 5px;
+    overflow: hidden;
+
+    border-radius: 999px;
+    background: rgba(38, 50, 56, 0.25);
+}
+
+.loading-road::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: -60px;
+
+    width: 40px;
+    height: 3px;
+
+    border-radius: 999px;
+    background: white;
+
+    animation: roadLine 0.8s linear infinite;
+}
+
+#loading-text {
+    min-height: 28px;
+    margin: 0;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.start-button-container {
+    height: 64px;          /* Reserve space */
+    margin-top: 28px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#start-button {
+    padding: 14px 40px;
+    border: none;
+    border-radius: 999px;
+
+    background: white;
+    color: #263238;
+
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,.2);
+
+    transition:
+        opacity .4s,
+        transform .4s,
+        background .2s;
+
+    /* hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+}
+
+#start-button.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+#start-button:hover {
+    transform: translateY(-2px);
+    background: #f5f5f5;
+}
+
+#start-button:active {
+    transform: translateY(1px);
+}
+@keyframes drive {
+    0%,
+    100% {
+        left: 0;
+    }
+
+    50% {
+        left: calc(100% - 48px);
+    }
+}
+
+@keyframes bounce {
+    from {
+        transform: translateY(0) rotate(-2deg);
+    }
+
+    to {
+        transform: translateY(-4px) rotate(2deg);
+    }
+}
+
+@keyframes roadLine {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(280px);
+    }
+}
+#start-button {
+    transition:
+        opacity 0.3s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+#start-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.2);
+}
+
+#start-button:active {
+    transform: translateY(0);
+}

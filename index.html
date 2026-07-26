@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Quicksand:wght@300..700&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-content">
+            <!-- <h1>Khadeeja's World</h1> -->
+
+            <div class="loading-animation">
+                <div class="loading-car">🚗</div>
+                <div class="loading-road"></div>
+            </div>
+
+            <p id="loading-text">🐻 Waking up the bear...</p>
+
+            <div class="start-button-container">
+                <button id="start-button">
+                    Start Journey
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- <canvas id="experience-canvas"></canvas> -->
+
+
+    <div id="experience">
+        <canvas id="experience-canvas"></canvas>
+    </div>
+     
+    <div class="modal hidden">
+        <div class="modal-wrapper">
+
+            <div class="modal-header">
+                <h1 class="modal-title">Project One</h1>
+                <button class="modal-exit-button">exit</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-content-wrapper">
+                    <a 
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="modal-project-visit-button hidden"
+                        >View Project
+
+                    </a>
+                    <div class="modal-project-description">
+
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis quo sit beatae, vel cum, maiores ratione eius dolor consequatur nihil sapiente molestias ipsa alias ipsum enim! Corporis facilis exercitationem ducimus?
+                        A nobis earum provident adipisci sed recusandae. Et neque voluptatum, cumque accusantium, nisi consequatur nostrum expedita reiciendis magni similique cum repellat minus error facilis dolor? Fugiat eius explicabo dolores voluptatum.
+                        Eaque maxime aliquam est doloribus sit fugiat molestiae obcaecati eveniet cum, quam deserunt, ad illo rerum impedit similique asperiores iusto nisi facilis commodi inventore expedita. Nam a quibusdam odio nesciunt!
+                        Doloribus, adipisci? Voluptatem similique modi at ullam quas dicta dignissimos nobis quam vel ab natus a ipsum perferendis dolorem vitae possimus omnis provident, aliquid enim ipsam dolorum culpa ipsa. Voluptatem.
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    }
+}
+</script>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
