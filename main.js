@@ -4,9 +4,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 // loading screen
-const loadingScreen = document.getElementById("loading-screen");
-const loadingText = document.getElementById("loading-text");
+const loadingScreen = document.querySelector(".loadingScreen");
 const startButton = document.getElementById("start-button");
+const loadingText = document.getElementById("loading-text");
 
 const loadingMessages = [
     "🌲 Growing the forest...",
@@ -16,6 +16,13 @@ const loadingMessages = [
     "🚀 Almost ready..."
 ];
 
+let character = {
+    instance: null,
+    moveDistance: 3,
+    jumpHeight: 1,
+    isMoving: false,
+    moveDuration: 0.2,
+};
 let loadingMessageIndex = 0;
 let loadingMessageTimer = null;
 let experienceReady = false;
@@ -222,6 +229,10 @@ loader.load(
                     child.position.y += 0.01;
                 }
             }
+
+            if (child.name === "Cube001"){
+                character.instance = child;
+            }
         });
 
         scene.add(glb.scene);
@@ -235,55 +246,7 @@ loader.load(
         loadingText.textContent = "Could not load the experience.";
     }
 );
-// loader.load( './portfolio8.glb', function ( glb ) {
-//     console.log(glb.scene)
 
-//     glb.scene.traverse(child=>{
-//         if(intersectObjectsNames.includes(child.name)){
-//             intersectObjects.push(child);
-//         }
-//         if(child.isMesh){
-//             child.castShadow = true;
-//             child.receiveShadow = true;
-//             // const name = child.name.toLowerCase();
-
-//             if (child.name.includes('Plane186')) {
-//                 // console.log("HERE")
-//                 child.castShadow = false;
-//                 child.receiveShadow = false;
-
-//                 child.material.transparent = true;
-//                 child.material.opacity = 0.75;
-
-//                 child.material.depthWrite = false;
-//                 child.material.depthTest = true;
-
-//                 child.material.side = THREE.DoubleSide;
-
-//                 child.renderOrder = 1;
-//                 child.material.needsUpdate = true;
-//                 child.material = new THREE.MeshStandardMaterial({
-//                     color: 0x55dfe5,
-//                     transparent: true,
-//                     opacity: 0.8,
-//                     roughness: 0.3,
-//                     metalness: 0,
-//                     side: THREE.DoubleSide,
-//                     depthWrite: false
-//                 });
-
-//                 child.castShadow = false;
-//                 child.receiveShadow = false;
-//                 child.renderOrder = 1;
-//                 child.position.y += 0.01;
-
-//             }
-//         }
-//     })
-//     scene.add( glb.scene);
-// }, undefined, function ( error ) {
-//   console.error( error );
-// } );
 
 // light
 
@@ -563,6 +526,47 @@ function findInteractiveObjectName(object) {
 
     return "";
 }
+
+function moveCharacter(targetPosition, targetRotation){
+    isMoving = true;
+    const t1 = gsap.timeline()
+
+    // ur here khadeejaaaaaaaaaaa
+}
+
+function onKeyDown(event){
+    if (isMoving) return;
+
+    const targetPosition = new THREE.Vector3().copy(character.instance.position);
+    let targetRotation = 0;
+    switch(event.key.toLowerCase()){
+        case "w":
+        case "arrowup":
+            targetPosition.z += character.moveDistance;
+            targetRotation = 0;
+            break
+        case "s":
+        case "arrowdown":
+            targetPosition.z -= character.moveDistance;
+            targetRotation = Math.PI;
+            break
+        case "a":
+        case "arrowleft":
+            targetPosition.x += character.moveDistance;
+            targetRotation = Math.PI/2;
+            break
+        case "d":
+        case "arrowright":
+            targetPosition.x -= character.moveDistance;
+            targetRotation = -Math.PI;
+            break
+        default:
+            return;
+    }
+    moveCharacter(targetPosition, targetRotation);
+
+}
+
 startButton.addEventListener("click", async () => {
     if (!experienceReady) return;
 
@@ -580,7 +584,6 @@ startButton.addEventListener("click", async () => {
         loadingScreen.classList.add("hidden");
     }, 300);
 });
-
 modalExitButton.addEventListener("click", () => {
     playSound("close");
     hideModal();
@@ -588,31 +591,8 @@ modalExitButton.addEventListener("click", () => {
 window.addEventListener("resize", handleResize); 
 canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("click", handleClick);
+window.addEventListener("keydown", onKeyDown);
 
-// function animate( time ) {
-//     // adding a stable camera position
-//     // console.log(camera.position);
-//      // update the picking ray with the camera and pointer position
-//     raycaster.setFromCamera(pointer, camera);
-
-//     // calculate objects intersecting the picking ray
-//     const intersects = raycaster.intersectObjects(intersectObjects, true);
-//     if(intersects.length > 0){
-//         document.body.style.cursor = "pointer";
-//     }else{
-//         document.body.style.cursor = "default";
-//         intersectObject = "";
-//     }
-//     for (let i = 0; i < intersects.length; i++) {
-//         intersectObject = intersects[0].object.parent.name;
-//         // intersects[i].object.material.color.set(0xff0000);
-
-//     }
-//     controls.update();
-
-//     renderer.render( scene, camera );
-
-// }
 function animate() {
     raycaster.setFromCamera(pointer, camera);
 

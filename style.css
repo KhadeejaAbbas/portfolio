@@ -15,7 +15,7 @@ body {
 }
 
 /* Experience */
-#expereince{
+#experience{
     position: fixed;
     height: 100%;
     width: 100%;
@@ -33,7 +33,7 @@ body.experience-started #experience {
     transform: scale(1);
 }
 
-#expereince-canvas{
+#experience-canvas{
     height: 100%;
     width: 100%; 
     display: block;
@@ -72,143 +72,56 @@ body.experience-started #experience {
 
 
 /* Loading Screen */
-#loading-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(20, 30, 35, 0.42);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    opacity: 1;
-    visibility: visible;
-
-    transition:
-        opacity 0.9s ease,
-        visibility 0.9s ease,
-        backdrop-filter 0.9s ease,
-        background 0.9s ease;
+.loadingScreen {
+  position: fixed;
+  z-index: 5;
+  width: 100%;
+  height: 100vh;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-#loading-screen.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-
-    background: rgba(20, 30, 35, 0);
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
+.loadingScreen.hidden {
+    display: none;
 }
-.loading-content {
-    width: min(430px, 85vw);
-    padding: 36px 32px;
-
-    text-align: center;
-    color: white;
-
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 24px;
-
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
-
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.loading-content h1 {
-    margin: 0 0 28px;
+.loadingScreen h1 {
+    margin-left: 40px;
+    letter-spacing: 3px;
     font-family: "Quicksand", sans-serif;
-    font-size: clamp(2rem, 6vw, 3.5rem);
-    text-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
-}
-
-#loading-text {
-    margin: 0;
-    min-height: 28px;
-
-    font-family: "Nunito Sans", sans-serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-
-    opacity: 1;
-    transition: opacity 0.3s ease;
-
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-
-
-.loading-animation {
-    position: relative;
-    width: 220px;
-    height: 90px;
-    margin: 0 auto 24px;
-}
-
-.loading-car {
-    font-size: 48px;
-    animation: float 2.5s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0) rotate(-2deg);
-    }
-
-    50% {
-        transform: translateY(-8px) rotate(2deg);
-    }
-}
-
-.loading-road {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 20px;
-
-    height: 5px;
-    overflow: hidden;
-
-    border-radius: 999px;
-    background: rgba(38, 50, 56, 0.25);
-}
-
-.loading-road::after {
-    content: "";
-    position: absolute;
-    top: 1px;
-    left: -60px;
-
-    width: 40px;
-    height: 3px;
-
-    border-radius: 999px;
-    background: white;
-
-    animation: roadLine 0.8s linear infinite;
-}
-
-#loading-text {
-    min-height: 28px;
-    margin: 0;
-
-    font-size: 1.1rem;
+    font-size: 3rem;
     font-weight: 700;
 }
+.loadingScreen h1 img {
 
+width: 35px;
+
+margin-left: 7px;
+margin-right: 7px;
+
+position: relative;
+top: 4px;
+
+animation:  rotateForever 2s infinite;
+}
+
+@keyframes rotateForever {
+  from {
+   transform: rotate(360deg);
+  }
+}
 .start-button-container {
-    height: 64px;          /* Reserve space */
-    margin-top: 28px;
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 90px);
+    transform: translateX(-50%);
+
+    height: 64px;
+    margin: 0;
 
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 }
 #start-button {
     padding: 14px 40px;
@@ -237,7 +150,6 @@ body.experience-started #experience {
     pointer-events: none;
     transform: translateY(10px);
 }
-
 #start-button.visible {
     opacity: 1;
     visibility: visible;
@@ -245,57 +157,58 @@ body.experience-started #experience {
     transform: translateY(0);
 }
 
-#start-button:hover {
-    transform: translateY(-2px);
-    background: #f5f5f5;
+#loading-text {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 180px);
+    transform: translateX(-50%);
+
+    margin: 0;
+    white-space: nowrap;
+
+    font-family: "Nunito Sans", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
-#start-button:active {
-    transform: translateY(1px);
+/* .loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+} */
+
+
+
+/* Mario Loading Screen */
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: calc(6*30px);
+  height: 50px;
+  display: flex;
+  /* color: #8d7958; */
+  color: #000000;
+
+  filter: drop-shadow(30px 25px 0 currentColor) drop-shadow(60px 0 0 currentColor) drop-shadow(120px 0 0 currentColor);
+  clip-path: inset(0 100% 0 0);
+  animation: l12 2s infinite steps(7);
 }
-@keyframes drive {
-    0%,
-    100% {
-        left: 0;
-    }
-
-    50% {
-        left: calc(100% - 48px);
-    }
+.loader:before {
+  content: "";
+  width: 30px;
+  height: 25px;
+  --c:no-repeat radial-gradient(farthest-side,currentColor 92%,#0000);
+  background: 
+    var(--c) left /70% 70%,
+    var(--c) right/20% 20%,
+    var(--c) top    0 right 15%/20% 20%,
+    var(--c) bottom 0 right 15%/20% 20%;
 }
-
-@keyframes bounce {
-    from {
-        transform: translateY(0) rotate(-2deg);
-    }
-
-    to {
-        transform: translateY(-4px) rotate(2deg);
-    }
-}
-
-@keyframes roadLine {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(280px);
-    }
-}
-#start-button {
-    transition:
-        opacity 0.3s ease,
-        transform 0.2s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
+@keyframes l12 {
+  100% {clip-path: inset(0 -30px 0 0)}
 }
 
-#start-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0,0,0,.2);
-}
 
-#start-button:active {
-    transform: translateY(0);
-}
