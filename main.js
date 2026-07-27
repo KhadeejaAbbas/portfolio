@@ -199,7 +199,7 @@ const modalContent = {
     },
     "Sci-fi_Low_Poly_ComputervScreen": {
         title: "Welcome 👋",
-        content: "My name is Khadeeja Abbas and this is my portfolio! Enjoy exploring!"  ,
+        content: "My name is Khadeeja Abbas and this is my portfolio! I've scattered displays of the projects I've been working on throughout the world. As you explore, you can also collect fruit and trade it for coins at the market!"  ,
         // link: "https://www.linkedin.com/in/khadeejaa/",
     },
     "Lowpoly_Apples_(Red_&_Green)": {
@@ -531,6 +531,37 @@ const modalTitle = document.querySelector(".modal-title");
 const modalProjectDescription = document.querySelector(".modal-project-description");
 const modalExitButton = document.querySelector(".modal-exit-button");
 const modalVisitProjectButton = document.querySelector(".modal-project-visit-button");
+let modalTimeout = null;
+
+// function showModal(id) {
+//     const content = modalContent[id];
+
+//     if (!content) return;
+
+//     modalTitle.textContent = content.title;
+//     modalProjectDescription.innerHTML = content.content || "";
+
+//     if (content.shop === true) {
+//         updateMarketDisplay();
+//     }
+//     if (content.cafe === true) {
+//         updateCafeDisplay();
+//     }
+//     if (content.link) {
+//         modalVisitProjectButton.href = content.link;
+//         modalVisitProjectButton.classList.remove("hidden");
+//     } else {
+//         modalVisitProjectButton.classList.add("hidden");
+//     }
+
+//     modal.classList.toggle(
+//         "case-study-modal",
+//         content.caseStudy === true
+//     );
+
+//     modal.classList.remove("hidden");
+// }
+
 
 function showModal(id) {
     const content = modalContent[id];
@@ -540,12 +571,17 @@ function showModal(id) {
     modalTitle.textContent = content.title;
     modalProjectDescription.innerHTML = content.content || "";
 
+    // Clear any previous timer
+    clearTimeout(modalTimeout);
+
     if (content.shop === true) {
         updateMarketDisplay();
     }
+
     if (content.cafe === true) {
         updateCafeDisplay();
     }
+
     if (content.link) {
         modalVisitProjectButton.href = content.link;
         modalVisitProjectButton.classList.remove("hidden");
@@ -559,8 +595,19 @@ function showModal(id) {
     );
 
     modal.classList.remove("hidden");
-}
 
+    // Auto-close only inventory pickups
+    if (content.title === "Stored in Inventory!") {
+    modal.classList.add("pickup-modal");
+    } else {
+        modal.classList.remove("pickup-modal");
+    }
+    if (content.title === "Stored in Inventory!") {
+        modalTimeout = setTimeout(() => {
+            hideModal();
+        }, 2000);
+    }
+}
 function hideModal() {
     modal.classList.add("hidden");
     modal.classList.remove("case-study-modal");

@@ -148,8 +148,9 @@ body.experience-started #experience {
 @media (max-width: 700px) {
     /* Normal small popups */
     .modal {
+        
         top: auto;
-        bottom: 18px;
+        bottom: max(170px, env(safe-area-inset-bottom) + 20px);
 
         width: calc(100vw - 28px);
         max-height: 55vh;
@@ -178,6 +179,23 @@ body.experience-started #experience {
 
         padding: 72px 22px 28px;
         overflow-y: auto;
+    }
+    .modal.pickup-modal {
+        top: 20px;
+        bottom: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: fit-content;
+        max-width: 260px;
+    }
+
+    .modal.pickup-modal .modal-wrapper {
+        padding: 16px 22px;
+    }
+
+    .modal.pickup-modal .modal-project-description,
+    .modal.pickup-modal .modal-project-visit-button {
+        display: none;
     }
 }
 
