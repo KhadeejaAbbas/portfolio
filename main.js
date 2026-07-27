@@ -35,6 +35,9 @@ let nameMesh = null;
 let namePivot = null;
 let nameKnockedOver = false;
 
+let heldDrink = null;
+let heldDrinkTimeout = null;
+
 function startLoadingMessages() {
     loadingMessageTimer = window.setInterval(() => {
         loadingMessageIndex =
@@ -373,7 +376,7 @@ const modalContent = {
                     I developed an artificial intelligence framework to
                     <strong> automatically identify cardiac scar tissue from MRI scans. 
                     By replacing time-consuming manual analysis with an automated pipeline,
-                    the project aimend to improve speed, consistency, and accessbility of cardiovascular imaging. 
+                    the project aimed to improve speed, consistency, and accessbility of cardiovascular imaging. 
                 </p>
             </section>
             <section class="project-info">
@@ -1392,6 +1395,14 @@ const inventory = {
     drinks: 0
 };
 
+const inventoryMax = {
+    apples: 50,
+    mangoes: 50,
+    tomatoes: 50,
+    coins: 500,
+    drinks: 50
+};
+
 const appleCountElement =
     document.getElementById("apple-count");
 
@@ -1431,37 +1442,67 @@ function animateInventoryCount(element) {
 
     element.classList.add("inventory-bounce");
 }
+let inventoryFullPopupTimeout = null;
+
+function showInventoryFullMessage(item) {
+    const popup = document.querySelector(".inventory-full-popup");
+
+    const itemName =
+        item.charAt(0).toUpperCase() + item.slice(1);
+
+    popup.textContent =
+        `${itemName} inventory is full!`;
+
+    popup.classList.add("visible");
+
+    clearTimeout(inventoryFullPopupTimeout);
+
+    inventoryFullPopupTimeout = setTimeout(() => {
+        popup.classList.remove("visible");
+    }, 2000);
+}
 
 function addToInventory(objectName) {
     if (appleObjectNames.includes(objectName)) {
-        inventory.apples++;
+        if (inventory.apples >= inventoryMax.apples) {
+            showInventoryFullMessage("apples");
+            return false;
+        }
 
-        appleCountElement.textContent =
-            inventory.apples;
+        inventory.apples++;
+        appleCountElement.textContent = inventory.apples;
         showInventory();
 
-        // animateInventoryCount(appleCountElement);
+        return true;
     }
 
     if (mangoObjectNames.includes(objectName)) {
+        if (inventory.mangoes >= inventoryMax.mangoes) {
+            showInventoryFullMessage("mangoes");
+            return false;
+        }
+
         inventory.mangoes++;
-
-        mangoCountElement.textContent =
-            inventory.mangoes;
-
+        mangoCountElement.textContent = inventory.mangoes;
         showInventory();
-        // animateInventoryCount(mangoCountElement);
+
+        return true;
     }
 
     if (tomatoObjectNames.includes(objectName)) {
+        if (inventory.tomatoes >= inventoryMax.tomatoes) {
+            showInventoryFullMessage("tomatoes");
+            return false;
+        }
+
         inventory.tomatoes++;
-
-        tomatoCountElement.textContent =
-            inventory.tomatoes;
-
+        tomatoCountElement.textContent = inventory.tomatoes;
         showInventory();
-        // animateInventoryCount(tomatoCountElement);
+
+        return true;
     }
+
+    return false;
 }
 
 
@@ -1574,10 +1615,40 @@ function sellFruit(fruit, requestedAmount) {
         return;
     }
 
-    const coinsEarned =
-        amountToSell * fruitPrices[fruit];
+    const availableCoinSpace =
+        inventoryMax.coins - inventory.coins;
 
-    inventory[fruit] -= amountToSell;
+    if (availableCoinSpace <= 0) {
+        showMarketMessage(
+            `Your coin pouch is full! Maximum: ${inventoryMax.coins}`,
+            "error"
+        );
+
+        return;
+    }
+
+    const maximumFruitSellable = Math.floor(
+        availableCoinSpace / fruitPrices[fruit]
+    );
+
+    const finalAmountToSell = Math.min(
+        amountToSell,
+        maximumFruitSellable
+    );
+
+    if (finalAmountToSell <= 0) {
+        showMarketMessage(
+            "You do not have enough coin space to sell this fruit.",
+            "error"
+        );
+
+        return;
+    }
+
+    const coinsEarned =
+        finalAmountToSell * fruitPrices[fruit];
+
+    inventory[fruit] -= finalAmountToSell;
     inventory.coins += coinsEarned;
 
     updateInventoryDisplay();
@@ -1586,12 +1657,12 @@ function sellFruit(fruit, requestedAmount) {
     const singularName = fruitLabels[fruit];
 
     const soldName =
-        amountToSell === 1
+        finalAmountToSell === 1
             ? singularName
             : fruit;
 
     showMarketMessage(
-        `Sold ${amountToSell} ${soldName} for ${coinsEarned} coins!`
+        `Sold ${finalAmountToSell} ${soldName} for ${coinsEarned} coins!`
     );
 
     playSound("fruit", 0.5);
@@ -1633,7 +1704,119 @@ function showCafeMessage(message, type = "success") {
     cafeMessage.classList.add(type);
 }
 
+function giveBearDrink() {
+    if (!character.instance) return;
+
+    // Remove the previous drink so they do not stack
+    if (heldDrink) {
+        heldDrink.removeFromParent();
+        heldDrink = null;
+    }
+
+    clearTimeout(heldDrinkTimeout);
+
+    heldDrink = new THREE.Group();
+
+    // Cup
+    const cupGeometry = new THREE.CylinderGeometry(
+        0.12, // top radius
+        0.09, // bottom radius
+        0.25, // height
+        16
+    );
+
+    const cupMaterial = new THREE.MeshStandardMaterial({
+        color: 0xe8d2b5,
+        roughness: 0.8
+    });
+
+    const cup = new THREE.Mesh(
+        cupGeometry,
+        cupMaterial
+    );
+
+    cup.castShadow = true;
+    heldDrink.add(cup);
+
+    // Coffee inside the cup
+    const coffeeGeometry = new THREE.CircleGeometry(
+        0.105,
+        16
+    );
+
+    const coffeeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4b2e20,
+        side: THREE.DoubleSide
+    });
+
+    const coffee = new THREE.Mesh(
+        coffeeGeometry,
+        coffeeMaterial
+    );
+
+    coffee.rotation.x = -Math.PI / 2;
+    coffee.position.y = 0.13;
+
+    heldDrink.add(coffee);
+
+    // Lid
+    const lidGeometry = new THREE.CylinderGeometry(
+        0.13,
+        0.13,
+        0.035,
+        16
+    );
+
+    const lidMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff
+    });
+
+    const lid = new THREE.Mesh(
+        lidGeometry,
+        lidMaterial
+    );
+
+    lid.position.y = 0.145;
+    lid.castShadow = true;
+
+    heldDrink.add(lid);
+
+    /*
+     * These are LOCAL coordinates relative to the bear.
+     * Adjust these numbers until the cup is in its paw.
+     */
+    heldDrink.position.set(
+        0.85,  // left/right
+        1.0,  // up/down
+        0.15   // forward/back
+    );
+
+    heldDrink.rotation.set(
+        0,
+        0,
+        -0.15
+    );
+
+    character.instance.add(heldDrink);
+
+    // Remove after 3 minutes
+    heldDrinkTimeout = setTimeout(() => {
+        if (heldDrink) {
+            heldDrink.removeFromParent();
+            heldDrink = null;
+        }
+    }, 1 * 60 * 1000);
+}
+
 function buyCafeDrink() {
+    if (inventory.drinks >= inventoryMax.drinks) {
+        showCafeMessage(
+            `You can only carry ${inventoryMax.drinks} drinks!`,
+            "error"
+        );
+
+        return;
+    }
     if (inventory.coins < DRINK_PRICE) {
         showCafeMessage(
             `You need ${DRINK_PRICE} coins to buy a drink!`,
@@ -1648,6 +1831,8 @@ function buyCafeDrink() {
 
     updateInventoryDisplay();
     updateCafeDisplay();
+
+    giveBearDrink();
 
     showCafeMessage(
         "We got a café drink! ☕"
@@ -1680,11 +1865,16 @@ function handleClick(event) {
     }
 
     if (jumpObjects.includes(intersectObject)) {
+        const wasAdded = addToInventory(intersectObject);
+
+        if (!wasAdded) {
+            return;
+        }
+
         jumpObject(intersectObject);
         playSound("fruit", 0.8);
-
-        addToInventory(intersectObject);
-    } else {
+    }
+    else {
         // Close inventory when opening another interaction
         clearTimeout(inventoryTimeout);
         inventoryPopup.classList.add("inventory-hidden");
@@ -1882,43 +2072,38 @@ function showBorderPopup() {
     }, 1800);
 }
 
-function onKeyDown(event){
-    // if (character.isMoving) return;
+const pressedKeys = new Set();
+let movementTimer = null;
 
-    // const targetPosition = new THREE.Vector3().copy(character.instance.position);
-    // let targetRotation = 0;
-    // switch(event.key.toLowerCase()){
-    //     case "w":
-    //     case "arrowup":
-    //         targetPosition.z += character.moveDistance;
-    //         targetRotation = 0 + BEAR_ROTATION_OFFSET;
-    //         break
-    //     case "s":
-    //     case "arrowdown":
-    //         targetPosition.z -= character.moveDistance;
-    //         targetRotation = Math.PI + BEAR_ROTATION_OFFSET;
-    //         break
-    //     case "d":
-    //     case "arrowright":
-    //         targetPosition.x += character.moveDistance;
-    //         targetRotation = Math.PI/2 + BEAR_ROTATION_OFFSET;
-    //         break
-    //     case "a":
-    //     case "arrowleft":
-    //         targetPosition.x -= character.moveDistance;
-    //         targetRotation = -Math.PI/2 + BEAR_ROTATION_OFFSET;
-    //         break
-    //     default:
-    //         return;
-    // }
-// function onKeyDown(event) {
+function onKeyDown(event) {
+    const key = event.key.toLowerCase();
+
+    const validKeys = [
+        "w", "a", "s", "d",
+        "arrowup", "arrowdown", "arrowleft", "arrowright"
+    ];
+
+    if (!validKeys.includes(key)) return;
+
+    event.preventDefault?.();
+    pressedKeys.add(key);
+
+    // Briefly wait so W + D can be detected together
+    clearTimeout(movementTimer);
+
+    movementTimer = setTimeout(() => {
+        moveFromPressedKeys();
+    }, 35);
+}
+
+function onKeyUp(event) {
+    pressedKeys.delete(event.key.toLowerCase());
+}
+
+function moveFromPressedKeys() {
     if (character.isMoving || !character.instance) return;
 
-    const targetPosition =
-        character.instance.position.clone();
-
-    let targetRotation = 0;
-
+    const targetPosition = character.instance.position.clone();
     const moveDirection = new THREE.Vector3();
 
     const cameraForward = new THREE.Vector3();
@@ -1935,46 +2120,58 @@ function onKeyDown(event){
         )
         .normalize();
 
-    switch (event.key.toLowerCase()) {
-        case "s":
-        case "arrowdown":
-            moveDirection.copy(cameraForward);
-            break;
-
-        case "w":
-        case "arrowup":
-            moveDirection.copy(cameraForward).negate();
-            break;
-
-        case "d":
-        case "arrowright":
-            moveDirection.copy(cameraRight);
-            break;
-
-        case "a":
-        case "arrowleft":
-            moveDirection.copy(cameraRight).negate();
-            break;
-
-        default:
-            return;
+    // Forward
+    if (
+        pressedKeys.has("w") ||
+        pressedKeys.has("arrowup")
+    ) {
+        moveDirection.addScaledVector(cameraForward, -1);
     }
+
+    // Backward
+    if (
+        pressedKeys.has("s") ||
+        pressedKeys.has("arrowdown")
+    ) {
+        moveDirection.add(cameraForward);
+    }
+
+    // Right
+    if (
+        pressedKeys.has("d") ||
+        pressedKeys.has("arrowright")
+    ) {
+        moveDirection.add(cameraRight);
+    }
+
+    // Left
+    if (
+        pressedKeys.has("a") ||
+        pressedKeys.has("arrowleft")
+    ) {
+        moveDirection.addScaledVector(cameraRight, -1);
+    }
+
+    if (moveDirection.lengthSq() === 0) return;
+
+    // Prevent diagonal movement from being faster
+    moveDirection.normalize();
 
     targetPosition.addScaledVector(
         moveDirection,
         character.moveDistance
     );
 
-    targetRotation = Math.atan2(
+    const targetRotation = Math.atan2(
         moveDirection.x,
         moveDirection.z
     );
 
     const outsideMap =
-    targetPosition.x < MAP_BOUNDS.minX ||
-    targetPosition.x > MAP_BOUNDS.maxX ||
-    targetPosition.z < MAP_BOUNDS.minZ ||
-    targetPosition.z > MAP_BOUNDS.maxZ;
+        targetPosition.x < MAP_BOUNDS.minX ||
+        targetPosition.x > MAP_BOUNDS.maxX ||
+        targetPosition.z < MAP_BOUNDS.minZ ||
+        targetPosition.z > MAP_BOUNDS.maxZ;
 
     if (outsideMap) {
         showBorderPopup();
@@ -2009,9 +2206,138 @@ function onKeyDown(event){
     if (!blocked) {
         moveCharacter(targetPosition, targetRotation);
     }
-    // moveCharacter(targetPosition, targetRotation);
-
 }
+
+// function onKeyDown(event){
+//     // if (character.isMoving) return;
+
+//     // const targetPosition = new THREE.Vector3().copy(character.instance.position);
+//     // let targetRotation = 0;
+//     // switch(event.key.toLowerCase()){
+//     //     case "w":
+//     //     case "arrowup":
+//     //         targetPosition.z += character.moveDistance;
+//     //         targetRotation = 0 + BEAR_ROTATION_OFFSET;
+//     //         break
+//     //     case "s":
+//     //     case "arrowdown":
+//     //         targetPosition.z -= character.moveDistance;
+//     //         targetRotation = Math.PI + BEAR_ROTATION_OFFSET;
+//     //         break
+//     //     case "d":
+//     //     case "arrowright":
+//     //         targetPosition.x += character.moveDistance;
+//     //         targetRotation = Math.PI/2 + BEAR_ROTATION_OFFSET;
+//     //         break
+//     //     case "a":
+//     //     case "arrowleft":
+//     //         targetPosition.x -= character.moveDistance;
+//     //         targetRotation = -Math.PI/2 + BEAR_ROTATION_OFFSET;
+//     //         break
+//     //     default:
+//     //         return;
+//     // }
+// // function onKeyDown(event) {
+//     if (character.isMoving || !character.instance) return;
+
+//     const targetPosition =
+//         character.instance.position.clone();
+
+//     let targetRotation = 0;
+
+//     const moveDirection = new THREE.Vector3();
+
+//     const cameraForward = new THREE.Vector3();
+//     camera.getWorldDirection(cameraForward);
+
+//     cameraForward.y = 0;
+//     cameraForward.normalize();
+//     cameraForward.multiplyScalar(-1);
+
+//     const cameraRight = new THREE.Vector3()
+//         .crossVectors(
+//             new THREE.Vector3(0, 1, 0),
+//             cameraForward
+//         )
+//         .normalize();
+
+//     switch (event.key.toLowerCase()) {
+//         case "s":
+//         case "arrowdown":
+//             moveDirection.copy(cameraForward);
+//             break;
+
+//         case "w":
+//         case "arrowup":
+//             moveDirection.copy(cameraForward).negate();
+//             break;
+
+//         case "d":
+//         case "arrowright":
+//             moveDirection.copy(cameraRight);
+//             break;
+
+//         case "a":
+//         case "arrowleft":
+//             moveDirection.copy(cameraRight).negate();
+//             break;
+
+//         default:
+//             return;
+//     }
+
+//     targetPosition.addScaledVector(
+//         moveDirection,
+//         character.moveDistance
+//     );
+
+//     targetRotation = Math.atan2(
+//         moveDirection.x,
+//         moveDirection.z
+//     );
+
+//     const outsideMap =
+//     targetPosition.x < MAP_BOUNDS.minX ||
+//     targetPosition.x > MAP_BOUNDS.maxX ||
+//     targetPosition.z < MAP_BOUNDS.minZ ||
+//     targetPosition.z > MAP_BOUNDS.maxZ;
+
+//     if (outsideMap) {
+//         showBorderPopup();
+//         return;
+//     }
+
+//     const bearBox = new THREE.Box3().setFromCenterAndSize(
+//         character.instance.position.clone(),
+//         new THREE.Vector3(1.2, 1.5, 1.2)
+//     );
+
+//     const movement = new THREE.Vector3(
+//         targetPosition.x - character.instance.position.x,
+//         0,
+//         targetPosition.z - character.instance.position.z
+//     );
+
+//     const predictedBearBox = bearBox.clone();
+//     predictedBearBox.translate(movement);
+
+//     knockOverName(predictedBearBox);
+
+//     let blocked = false;
+
+//     for (const box of colliders) {
+//         if (predictedBearBox.intersectsBox(box)) {
+//             blocked = true;
+//             break;
+//         }
+//     }
+
+//     if (!blocked) {
+//         moveCharacter(targetPosition, targetRotation);
+//     }
+//     // moveCharacter(targetPosition, targetRotation);
+
+// }
 
 startButton.addEventListener("click", async () => {
     if (!experienceReady) return;
@@ -2038,6 +2364,8 @@ window.addEventListener("resize", handleResize);
 canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("click", handleClick);
 window.addEventListener("keydown", onKeyDown);
+window.addEventListener("keyup", onKeyUp);
+
 const mobileControlButtons =
     document.querySelectorAll(".mobile-control");
 
