@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { OBB } from "three/addons/math/OBB.js";
 
 // loading screen
 const loadingScreen = document.querySelector(".loadingScreen");
@@ -19,13 +20,17 @@ const loadingMessages = [
 let character = {
     instance: null,
     moveDistance: 3,
-    jumpHeight: 1,
+    jumpHeight: .5,
     isMoving: false,
     moveDuration: 0.2,
 };
 let loadingMessageIndex = 0;
 let loadingMessageTimer = null;
 let experienceReady = false;
+
+let nameMesh = null;
+let namePivot = null;
+let nameKnockedOver = false;
 
 function startLoadingMessages() {
     loadingMessageTimer = window.setInterval(() => {
@@ -50,10 +55,18 @@ function finishLoading() {
 
 startLoadingMessages();
 
+
 // actual screen
 const scene = new THREE.Scene();
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
+// hit boxes
+const colliders = [];
+const orientedColliders = [];
+
+const nameTriggers = [];
+const letterObjects = [];
+let lettersKnockedOver = false;
 
 const canvas = document.getElementById("experience-canvas");
 const sizes = {
@@ -188,6 +201,15 @@ const intersectObjectsNames = [
     "Plane186" // sea
 ]
 
+const jumpObjects = [
+    "Lowpoly_Apples_(Red_&_Green)",
+    "Lowpoly_Apples_(Red_&_Green)001",
+    "Lowpoly_Apples_(Red_&_Green)002",
+    "Lowpoly_Apples_(Red_&_Green)003",
+    "Low_Poly_Tomato_Crate",
+    "Low_Poly_Fruit_Manggo",
+    "Low_Poly_Fruit_Manggo001"
+];
 
 const renderer = new THREE.WebGLRenderer({canvas: canvas});
 renderer.setSize( sizes.width, sizes.height );
@@ -201,9 +223,62 @@ loader.load(
 
     // Model loaded
     function (glb) {
-        console.log(glb.scene);
+
+ 
 
         glb.scene.traverse((child) => {
+            // console.log(child.name);
+            if (
+                child.name === "House_Low_Poly" ||
+                // child.name === "Tree" ||
+                child.name === "Low_Poly_Minimarket" ||
+                child.name === "Coffee_Shop_3d_graphic_illustration" ||
+                child.name === "Low_Poly_Tomato_Crate" ||
+                // child.name === "Plane186" || 
+                child.name === "solarcarHelios" ||
+                child.name === "Lowpoly_building" ||
+                child.name === "Coffee_Shop_3d_graphic_illustration001"
+                // child.name === "khadeeja" 
+
+            ) {
+                const box = new THREE.Box3().setFromObject(child);
+
+                // Don't shrink objects that already feel right
+                if (child.name !== "Low_Poly_Tomato_Crate") {
+
+                    const center = new THREE.Vector3();
+                    const size = new THREE.Vector3();
+
+                    box.getCenter(center);
+                    box.getSize(size);
+
+                    // Shrink footprint while keeping height
+                    size.x *= 0.65;
+                    size.z *= 0.65;
+                    size.y *= 0.95;
+
+                    box.setFromCenterAndSize(center, size);
+                }
+
+                colliders.push(box);
+                // scene.add(new THREE.Box3Helper(box));
+                colliders.push(box);
+                // scene.add(new THREE.Box3Helper(box));
+            }
+            // if (child.name === "khadeeja") {
+            //     child.traverse((letter) => {
+            //         if (letter.isMesh) {
+            //             const letterBox = new THREE.Box3().setFromObject(letter);
+
+            //             // Slightly shrink each letter's collider
+            //             letterBox.expandByScalar(-0.1);
+
+            //             colliders.push(letterBox);
+            //             scene.add(new THREE.Box3Helper(letterBox));
+            //         }
+            //     });
+            // }
+
             if (intersectObjectsNames.includes(child.name)) {
                 intersectObjects.push(child);
             }
@@ -230,10 +305,55 @@ loader.load(
                 }
             }
 
-            if (child.name === "Cube001"){
+            if (child.name === "Cube001") {
                 character.instance = child;
+
+                // Face toward the camera when the game starts
+                character.instance.lookAt(camera.position);
+                character.instance.rotation.x = 0;
+                character.instance.rotation.z = 0;
             }
         });
+
+        // const nameObject = glb.scene.getObjectByName("khadeeja");
+
+        // if (nameObject) {
+        //     nameObject.traverse((child) => {
+        //         if (!child.isMesh) return;
+
+        //         letterObjects.push({
+        //             mesh: child,
+        //             box: new THREE.Box3().setFromObject(child)
+        //         });
+        //     });
+
+        //     console.log("Letter meshes:", letterObjects.length);
+        // }
+        nameMesh = glb.scene.getObjectByName("khadeeja");
+        namePivot = new THREE.Group();
+
+        scene.add(namePivot);
+
+        namePivot.position.copy(nameMesh.position);
+
+        nameMesh.position.set(0, 0, 0);
+
+        namePivot.add(nameMesh);
+
+        addTrigger(1, 1, 5.5, 1, 2, 1);
+        addTrigger(1.8, 1, 5, 1, 2, 1);
+        addTrigger(3.2, 1, 4, 2, 2, 1);
+
+        addTrigger(4.4, 1, 2.8, 1, 2, 1);
+        addTrigger(5.6, 1, 1.8, 1, 2, 1);
+        addTrigger(7.0, 1, 0.8, 1, 2, 1);
+        addTrigger(8.5, 1, -0.75, 2, 1, 1);
+
+        addTrigger(9.5, 1, -2, 1, 2, 1);
+        addTrigger(10.5, 1, -2.5, 1, 2, 1);
+        addTrigger(11.5, 1, -3, 1, 2, 1);
+        // Temporary so you can see it
+        // scene.add(new THREE.Box3Helper(nameBox));
 
         scene.add(glb.scene);
         finishLoading();
@@ -247,6 +367,18 @@ loader.load(
     }
 );
 
+
+function addTrigger(x, y, z, sx, sy, sz) {
+    const box = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(x, y, z),
+        new THREE.Vector3(sx, sy, sz)
+    );
+
+    nameTriggers.push(box);
+
+    // Temporary yellow outline
+    // scene.add(new THREE.Box3Helper(box));
+}
 
 // light
 
@@ -288,11 +420,11 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
 
-const directionalHelper = new THREE.DirectionalLightHelper(sun, 5);
-scene.add(directionalHelper);
+// const directionalHelper = new THREE.DirectionalLightHelper(sun, 5);
+// scene.add(directionalHelper);
 
-const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
-scene.add(shadowHelper);
+// const shadowHelper = new THREE.CameraHelper(sun.shadow.camera);
+// scene.add(shadowHelper);
 
 scene.background = new THREE.Color(0xaedce5);
 renderer.setClearColor(0x9ed7e5);
@@ -305,8 +437,11 @@ const camera = new THREE.PerspectiveCamera(
     100
 );
 
-camera.position.set(8, 7, 11);
+// camera.position.set(8, 7, 11);
+camera.position.set(8, 3.5, 11);
 
+// const cameraOffset = new THREE.Vector3(8, 7, 11);
+const cameraOffset = new THREE.Vector3(8, 3.5, 11);
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 1, 0);
 controls.enableDamping = true;
@@ -460,8 +595,10 @@ function startMusic() {
 
 const sounds = {
     open: new Audio("./assets/music/old_radio_button.mp3"),
-    // open: new Audio("./assets/music/mouse_click.mp3"),
-    close: new Audio("./assets/music/Source Metal Clicks Delicate Light Sharp Clip Mid 07.mp3")
+    fruit: new Audio("./assets/music/shidenbeatsmusic-sound-effect-twinklesparkle-115095.mp3"), // i like this one
+    // fall: new Audio("./assets/music/universfield-heavy-body-fall-352446.mp3"), // I LIKE IT
+    fall: new Audio("./assets/music/dragon-studio-heavy-object-falling-515261.mp3"), // I LIKE IT
+    close: new Audio("./assets/music/Source Metal Clicks Delicate Light Sharp Clip Mid 07.mp3"),
 };
 
 Object.values(sounds).forEach(sound => {
@@ -505,10 +642,51 @@ function handlePointerMove(event) {
         -((event.clientY - rect.top) / rect.height) * 2 + 1;
 }
 
+let isFruitJumping = false;
+
+function jumpObject(objectName) {
+    if (isFruitJumping) return;
+
+    const mesh = scene.getObjectByName(objectName);
+    if (!mesh) return;
+
+    isFruitJumping = true;
+
+    const startY = mesh.position.y;
+
+    gsap.timeline({
+        onComplete: () => {
+            mesh.position.y = startY;
+            isFruitJumping = false;
+        }
+    })
+    .to(mesh.position, {
+        y: startY + 0.5,
+        duration: 0.2,
+        ease: "power2.out"
+    })
+    .to(mesh.position, {
+        y: startY,
+        duration: 0.3,
+        ease: "bounce.out"
+    });
+}
+
 function handleClick(){
     // console.log(intersectObject);
-    if(intersectObject !== ""){
-        playSound("open", 0.4);
+    // if(intersectObject !== ""){
+    //     playSound("open", 0.4);
+    //     showModal(intersectObject);
+    // }
+    if (intersectObject !== "") {
+
+        if (jumpObjects.includes(intersectObject)) {
+            jumpObject(intersectObject);
+            playSound("fruit", 0.8)
+        } else{
+            playSound("open", 0.4);
+        }
+        // playSound("open", 0.4);
         showModal(intersectObject);
     }
 }
@@ -527,15 +705,127 @@ function findInteractiveObjectName(object) {
     return "";
 }
 
-function moveCharacter(targetPosition, targetRotation){
-    isMoving = true;
-    const t1 = gsap.timeline()
+function knockOverName(predictedBearBox) {
+    if (!nameMesh || nameKnockedOver) return;
 
-    // ur here khadeejaaaaaaaaaaa
+    const touchedName = nameTriggers.some((box) =>
+        predictedBearBox.intersectsBox(box)
+    );
+
+    if (!touchedName) return;
+
+    nameKnockedOver = true;
+    playSound("fall", 0.4);
+
+    // Keep its current world position if it was inside a pivot/group
+    scene.attach(nameMesh);
+
+    const startPosition = nameMesh.position.clone();
+    const startQuaternion = nameMesh.quaternion.clone();
+
+    const groundY = 0;
+
+    // Rotate 90 degrees around the text's LOCAL X-axis
+    const flatRotation = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(1, 0, 0),
+        -Math.PI / 2
+    );
+
+    const finalQuaternion = startQuaternion
+        .clone()
+        .multiply(flatRotation);
+
+    const rotationProgress = { value: 0 };
+
+    gsap.timeline()
+
+        // Simple explosion upward and sideways
+        .to(nameMesh.position, {
+            x: startPosition.x + 5,
+            y: startPosition.y + 4,
+            z: startPosition.z - 3,
+            duration: 0.45,
+            ease: "power3.out"
+        }, 0)
+
+        // Turn it flat without excessive spinning
+        .to(rotationProgress, {
+            value: 1,
+            duration: 0.65,
+            ease: "power2.out",
+
+            onUpdate: () => {
+                nameMesh.quaternion.slerpQuaternions(
+                    startQuaternion,
+                    finalQuaternion,
+                    rotationProgress.value
+                );
+            }
+        }, 0)
+
+        // Drop it onto the ground
+        .to(nameMesh.position, {
+            y: groundY,
+            duration: 0.55,
+            ease: "power2.in"
+        }, 0.45)
+
+        // Correct the height after it has rotated
+        .call(() => {
+            nameMesh.quaternion.copy(finalQuaternion);
+            nameMesh.updateMatrixWorld(true);
+
+            const finalBox = new THREE.Box3().setFromObject(nameMesh);
+
+            nameMesh.position.y += groundY - finalBox.min.y;
+            nameMesh.updateMatrixWorld(true);
+        })
+
+        // Small impact bounce
+        .to(nameMesh.position, {
+            y: "+=0.12",
+            duration: 0.08,
+            ease: "power1.out"
+        })
+
+        .to(nameMesh.position, {
+            y: "-=0.12",
+            duration: 0.15,
+            ease: "bounce.out"
+        });
 }
 
+function moveCharacter(targetPosition, targetRotation){
+    character.isMoving = true;
+    const t1 = gsap.timeline({
+        onComplete: ()=>{
+            character.isMoving = false;
+        }
+    })
+
+    t1.to(character.instance.position, {
+        x: targetPosition.x,
+        z: targetPosition.z,
+        duration: character.moveDuration, 
+    });
+
+    t1.to(character.instance.rotation, {
+        y: targetRotation,
+        duration: character.moveDuration, 
+    }, 0);
+
+
+    t1.to(character.instance.position, {
+        y: character.instance.position.y + character.jumpHeight,
+        duration: character.moveDuration / 2, 
+        yoyo: true,
+        repeat: 1,
+    }, 0);
+}
+
+
 function onKeyDown(event){
-    if (isMoving) return;
+    if (character.isMoving) return;
 
     const targetPosition = new THREE.Vector3().copy(character.instance.position);
     let targetRotation = 0;
@@ -550,20 +840,49 @@ function onKeyDown(event){
             targetPosition.z -= character.moveDistance;
             targetRotation = Math.PI;
             break
-        case "a":
-        case "arrowleft":
+        case "d":
+        case "arrowright":
             targetPosition.x += character.moveDistance;
             targetRotation = Math.PI/2;
             break
-        case "d":
-        case "arrowright":
+        case "a":
+        case "arrowleft":
             targetPosition.x -= character.moveDistance;
-            targetRotation = -Math.PI;
+            targetRotation = -Math.PI/2;
             break
         default:
             return;
     }
-    moveCharacter(targetPosition, targetRotation);
+
+    const bearBox = new THREE.Box3().setFromCenterAndSize(
+        character.instance.position.clone(),
+        new THREE.Vector3(1.2, 1.5, 1.2)
+    );
+
+    const movement = new THREE.Vector3(
+        targetPosition.x - character.instance.position.x,
+        0,
+        targetPosition.z - character.instance.position.z
+    );
+
+    const predictedBearBox = bearBox.clone();
+    predictedBearBox.translate(movement);
+
+    knockOverName(predictedBearBox);
+
+    let blocked = false;
+
+    for (const box of colliders) {
+        if (predictedBearBox.intersectsBox(box)) {
+            blocked = true;
+            break;
+        }
+    }
+
+    if (!blocked) {
+        moveCharacter(targetPosition, targetRotation);
+    }
+    // moveCharacter(targetPosition, targetRotation);
 
 }
 
@@ -593,8 +912,49 @@ canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("click", handleClick);
 window.addEventListener("keydown", onKeyDown);
 
+const desiredCameraPosition = new THREE.Vector3();
+const desiredCameraTarget = new THREE.Vector3();
+
 function animate() {
     raycaster.setFromCamera(pointer, camera);
+
+    if (character.instance) {
+        // Where the camera should gradually move
+        desiredCameraPosition.set(
+            character.instance.position.x + cameraOffset.x,
+            character.instance.position.y + cameraOffset.y,
+            character.instance.position.z + cameraOffset.z
+        );
+
+        // Camera collision box
+        const cameraBox = new THREE.Box3().setFromCenterAndSize(
+            desiredCameraPosition,
+            new THREE.Vector3(0.6, 0.6, 0.6)
+        );
+
+        let cameraBlocked = false;
+
+        for (const box of colliders) {
+            if (cameraBox.intersectsBox(box)) {
+                cameraBlocked = true;
+                break;
+            }
+        }
+
+        // Only move if not inside a building
+        if (!cameraBlocked) {
+            camera.position.lerp(desiredCameraPosition, 0.06);
+        }
+
+        // Keep the bear near the centre of the screen
+        desiredCameraTarget.set(
+            character.instance.position.x,
+            character.instance.position.y + 0.4,
+            character.instance.position.z
+        );
+
+        controls.target.lerp(desiredCameraTarget, 0.1);
+    }
 
     const intersects = raycaster.intersectObjects(
         intersectObjects,
@@ -616,6 +976,7 @@ function animate() {
     controls.update();
     renderer.render(scene, camera);
 }
+
 renderer.setAnimationLoop( animate );
 
 
