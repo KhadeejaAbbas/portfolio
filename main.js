@@ -849,8 +849,8 @@ createCloud(-40, 20, 20, 1.6);
 
 const renderer = new THREE.WebGLRenderer({canvas: canvas});
 renderer.setSize( sizes.width, sizes.height );
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
-// renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 
 // loading the blender model
