@@ -1646,11 +1646,39 @@ function handleClick(event) {
 
     showModal(intersectObject);
 }
+// function findInteractiveObjectName(object) {
+//     let currentObject = object;
+
+//     while (currentObject) {
+//         if (intersectObjectsNames.includes(currentObject.name)) {
+//             return currentObject.name;
+//         }
+
+//         currentObject = currentObject.parent;
+//     }
+
+//     return "";
+// }
+
 function findInteractiveObjectName(object) {
-    let currentObject = object;
+    // Library text is inside the café hierarchy,
+    // so override it before checking parents
+    if (
+        object.name
+            .toLowerCase()
+            .includes("text031")
+    ) {
+        return "House_Low_Poly";
+    }
+
+    let currentObject = object.parent;
 
     while (currentObject) {
-        if (intersectObjectsNames.includes(currentObject.name)) {
+        if (
+            intersectObjectsNames.includes(
+                currentObject.name
+            )
+        ) {
             return currentObject.name;
         }
 
@@ -1659,6 +1687,7 @@ function findInteractiveObjectName(object) {
 
     return "";
 }
+
 let namePopupTimeout = null;
 
 function showNamePopup() {
