@@ -1661,19 +1661,18 @@ function handleClick(event) {
 // }
 
 function findInteractiveObjectName(object) {
-    // Library text is inside the café hierarchy,
-    // so override it before checking parents
-    if (
-        object.name
-            .toLowerCase()
-            .includes("text031")
-    ) {
-        return "House_Low_Poly";
-    }
-
-    let currentObject = object.parent;
+    let currentObject = object;
 
     while (currentObject) {
+        // Check the library text before checking its café parents
+        if (
+            currentObject.name
+                .toLowerCase()
+                .includes("text031")
+        ) {
+            return "House_Low_Poly";
+        }
+
         if (
             intersectObjectsNames.includes(
                 currentObject.name
@@ -1687,6 +1686,7 @@ function findInteractiveObjectName(object) {
 
     return "";
 }
+
 
 let namePopupTimeout = null;
 
