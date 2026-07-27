@@ -39,31 +39,112 @@
 
             <div class="modal-header">
                 <h1 class="modal-title">Project One</h1>
-                <button class="modal-exit-button">exit</button>
+                <button class="modal-exit-button">&times;</button>
             </div>
             <div class="modal-content">
                 <div class="modal-content-wrapper">
-                    <a 
+
+                    <a
                         href="#"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="modal-project-visit-button hidden"
-                        >View Project
-
+                    > 
+                        <span>🔗</span>
+                        View Project
                     </a>
-                    <div class="modal-project-description">
 
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis quo sit beatae, vel cum, maiores ratione eius dolor consequatur nihil sapiente molestias ipsa alias ipsum enim! Corporis facilis exercitationem ducimus?
-                        A nobis earum provident adipisci sed recusandae. Et neque voluptatum, cumque accusantium, nisi consequatur nostrum expedita reiciendis magni similique cum repellat minus error facilis dolor? Fugiat eius explicabo dolores voluptatum.
-                        Eaque maxime aliquam est doloribus sit fugiat molestiae obcaecati eveniet cum, quam deserunt, ad illo rerum impedit similique asperiores iusto nisi facilis commodi inventore expedita. Nam a quibusdam odio nesciunt!
-                        Doloribus, adipisci? Voluptatem similique modi at ullam quas dicta dignissimos nobis quam vel ab natus a ipsum perferendis dolorem vitae possimus omnis provident, aliquid enim ipsam dolorum culpa ipsa. Voluptatem.
-                    </div>
+                    <div class="modal-project-description"></div>
 
                 </div>
-
             </div>
         </div>
     </div>
+
+    <div class="border-popup">
+    You’ve reached the edge of the map!
+    </div>
+    <div class="name-popup">
+    🐻 Careful! This bear is stronger than it appears. 🐻 
+    </div>
+
+
+    <!-- menu -->
+    <div class="menu">
+        <button
+            id="menu-button"
+            class="menu-button"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded="false"
+            aria-controls="menu-popup"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div
+            id="menu-popup"
+            class="menu-popup menu-hidden"
+        >
+            <h2>Menu</h2>
+
+            <a href="./assets/resume.pdf" target="_blank">
+                Resume
+            </a>
+
+            <a href="https://github.com/KhadeejaAbbas" target="_blank">
+                GitHub
+            </a>
+
+            <a href="https://www.linkedin.com/in/khadeejaa/" target="_blank">
+                LinkedIn
+            </a>
+
+            <button type="button" class="menu-reference-button">
+                Behind the Scenes
+            </button>
+        </div>
+    </div>
+    <!-- inventory -->
+<div class="inventory">
+    <button
+        id="backpack-button"
+        class="backpack-button"
+        type="button"
+        aria-label="Open inventory"
+    >
+        🎒
+    </button>
+
+    <div id="inventory-popup" class="inventory-popup inventory-hidden">
+        <div class="inventory-money">
+            <span>🪙 Coins</span>
+            <span id="coin-count">0</span>
+        </div>
+        <div class="inventory-item">
+            <span>🧋 Drinks</span>
+            <span id="drink-count">0</span>
+        </div>
+            <div class="inventory-item">
+            <span>🍎 Apples</span>
+            <span id="apple-count">0</span>
+        </div>
+
+        <div class="inventory-item">
+            <span>🥭 Mangoes</span>
+            <span id="mango-count">0</span>
+        </div>
+
+        <div class="inventory-item">
+            <span>🍅 Tomatoes</span>
+            <span id="tomato-count">0</span>
+        </div>
+    </div>
+</div>
+
+    <!-- inventory end -->
 
     <script type="importmap">
 {
@@ -76,5 +157,43 @@
 
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
     <script type="module" src="./main.js"></script>
+
+<!-- mobile controls -->
+    <div class="mobile-controls" aria-label="Mobile movement controls">
+    <button
+        class="mobile-control mobile-up"
+        data-key="w"
+        aria-label="Move forward"
+    >
+        ▲
+    </button>
+
+    <button
+        class="mobile-control mobile-left"
+        data-key="a"
+        aria-label="Move left"
+    >
+        ◀
+    </button>
+
+    <button
+        class="mobile-control mobile-down"
+        data-key="s"
+        aria-label="Move backward"
+    >
+        ▼
+    </button>
+
+    <button
+        class="mobile-control mobile-right"
+        data-key="d"
+        aria-label="Move right"
+    >
+        ▶
+    </button>
+</div>
+
+
+
 </body>
 </html>
